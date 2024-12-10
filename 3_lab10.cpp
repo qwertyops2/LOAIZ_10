@@ -70,6 +70,84 @@ void printG(vector<vector<int>>& G) {
     }
 }
 
+vector<int> BFSD(vector<vector<int>> G, int v) {
+    vector<int> DIST(G.size(), INT_MAX);
+    queue<int> Q;
+
+    Q.push(v);
+    DIST[v] = 0;
+
+    while (!Q.empty()) {
+        v = Q.front();
+        Q.pop();
+
+        for (int i = 0; i < G.size(); ++i) {
+            if (G[v][i] > 0 && DIST[v] + G[v][i] < DIST[i]) {
+                Q.push(i);
+                DIST[i] = DIST[v] + G[v][i];
+            }
+        }
+    }
+    return DIST;
+}
+
+void findRDCvPv(vector<vector<int>>& G) {
+    vector<int>dist(G.size());
+    vector<int> cV;
+    vector<int> pV;
+
+    int radius = INT_MAX;
+    int diameter = 0;
+
+    int Dist_min = INT_MAX;
+    int Dist_max = 0;
+
+    for (int i = 0; i < G.size(); i++) {
+        dist = BFSD(G, i);
+        int DISTma = 0;
+        for (int di : dist) {
+            if (di != INT_MAX) {
+                DISTma = max(DISTma, di);
+            }
+        }
+        Dist_max = max(Dist_max, DISTma);
+        Dist_min = min(Dist_min, DISTma);
+    }
+
+    radius = Dist_min;
+    diameter = Dist_max;
+
+    for (int i = 0; i < G.size(); i++) {
+        dist = BFSD(G, i);
+        int DISTma = 0;
+        for (int di : dist) {
+            if (di != INT_MAX) {
+                DISTma = max(DISTma, di);
+            }
+        }
+        Dist_max = max(Dist_max, DISTma);
+        Dist_min = min(Dist_min, DISTma);
+
+        if (DISTma == radius) {
+            cV.push_back(i);
+        }
+        if (DISTma == diameter) {
+            pV.push_back(i);
+        }
+    }
+
+    cout << "Радиус: " << radius << endl;
+    cout << "Диаметр: " << diameter << endl;
+    cout << "Центральные вершины: ";
+    for (int v : cV) {
+        cout << v + 1 << " ";
+    }
+    cout << endl << "Периферийные вершины: ";
+    for (int v : pV) {
+        cout << v + 1 << " ";
+    }
+}
+
 int main(int argc, char* argv[]) {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -124,6 +202,22 @@ int main(int argc, char* argv[]) {
     }
 
     printG(G);
+    cout << endl << "Обход в ширину BFSD неор:" << endl;
+    for (int i = 0; i < G.size(); i++) {
+        vector<int> DIST(size, INT_MAX);
+        DIST = BFSD(G, i);
+        cout << "От вершины " << i + 1 << ":" << endl;
+        int maxDistance = -1;
+        for (int j = 0; j < size; j++) {
+		    if (DIST[j] == 2147483647) DIST[j] = -1;
+		    cout << "До вершины " << j + 1 << " расстояние: " << DIST[j] << endl;
+            if (DIST[j] != -1 && DIST[j] > maxDistance) {
+                maxDistance = DIST[j];
+            }
+	    }
+        cout << "Эксцентриситет вершины " << i + 1 << ": " << maxDistance << endl;
+    }
+    findRDCvPv(G);
 
     return 0;
 }
