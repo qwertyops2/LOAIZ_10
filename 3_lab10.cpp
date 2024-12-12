@@ -91,6 +91,27 @@ vector<int> BFSD(vector<vector<int>> G, int v) {
     return DIST;
 }
 
+vector<int> BFS(vector<vector<int>> G, int v) {
+    vector<int> DIST(G.size(), -1);
+    queue<int> Q;
+
+    Q.push(v);
+    DIST[v] = 0;
+
+    while (!Q.empty()) {
+        v = Q.front();
+        Q.pop();
+
+        for (int i = 0; i < G.size(); ++i) {
+            if (G[v][i]==1 && DIST[i]==-1) {
+                Q.push(i);
+                DIST[i] = DIST[v] + 1;
+            }
+        }
+    }
+    return DIST;
+}
+
 void findRDCvPv(vector<vector<int>>& G) {
     vector<int>dist(G.size());
     vector<int> cV;
@@ -178,44 +199,58 @@ int main(int argc, char* argv[]) {
     cout << "Введите количество вершин графа: ";
     cin >> size;
 
+    int k = 0;
+
     vector<vector<int>> G(size, vector<int>(size, 0));
 
     if (graphType == "weighted" && orientation == "undirected") {
         G = createGNeOr(G);
         cout << "Матрица смежности неориентированного взвешенного графа:" << endl;
+        k = 1;
     }
     else if (graphType == "weighted" && orientation == "directed") {
         G = createGOr(G);
         cout << "Матрица смежности ориентированного взвешенного графа:" << endl;
+        k = 2;
     }
     else if (graphType == "unweighted" && orientation == "undirected") {
         G = createGNeOrU(G);
         cout << "Создание невзвешенного неориентированного графа:" << endl;
+        k = 3;
     }
     else if (graphType == "unweighted" && orientation == "directed") {
         G = createGOrU(G);
         cout << "Создание невзвешенного ориентированного графа:" << endl;
+        k = 4;
     }
     else {
         cout << "Некорректные параметры." << endl;
+        k = 0;
         return 1;
     }
 
     printG(G);
     cout << endl << "Обход в ширину BFSD неор:" << endl;
+    vector<int> DIST;
     for (int i = 0; i < G.size(); i++) {
-        vector<int> DIST(size, INT_MAX);
-        DIST = BFSD(G, i);
+        if (k==1 || k==2)
+        {
+            DIST = BFSD(G, i);  
+        }
+        else if (k==3 || k == 4){
+            DIST = BFS(G, i);
+        }
         cout << "От вершины " << i + 1 << ":" << endl;
         int maxDistance = -1;
         for (int j = 0; j < size; j++) {
-		    if (DIST[j] == 2147483647) DIST[j] = -1;
-		    cout << "До вершины " << j + 1 << " расстояние: " << DIST[j] << endl;
+            if (DIST[j] == 2147483647) DIST[j] = -1;
+            cout << "До вершины " << j + 1 << " расстояние: " << DIST[j] << endl;
             if (DIST[j] != -1 && DIST[j] > maxDistance) {
                 maxDistance = DIST[j];
             }
-	    }
+        }
         cout << "Эксцентриситет вершины " << i + 1 << ": " << maxDistance << endl;
+
     }
     findRDCvPv(G);
 
